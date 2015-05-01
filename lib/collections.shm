@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -u
 
@@ -60,6 +60,21 @@ collections_map_get() {
     if collections_map_contains "$identifier" "$key"; then
         local file=$(__build_filename $identifier map)
         egrep "^$key:::" $file | sed "s/^$key::://"
+        return 0
+    fi
+    return 1
+}
+
+collections_map_keys() {
+    local identifier=$1
+
+    if ! __check_parameters "Identifier is a mandatory parameter!" "$identifier"; then
+        return 1
+    fi
+ 
+    local file=$(__build_filename $identifier map)
+    if [ -f $file ]; then
+        egrep -o "^$key:::" $file | sed "s/:::$//"
         return 0
     fi
     return 1
