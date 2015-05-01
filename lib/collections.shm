@@ -21,6 +21,10 @@ collections_set_put() {
     if ! __check_parameters "Identifier and Item are mandatory parameters!" $identifier $item; then
         return 1
     fi
+
+    collections_set_delete $identifier $item
+
+    local file=$(__build_filename $identifier)
 }
 
 collections_set_delete() {
@@ -30,6 +34,12 @@ collections_set_delete() {
     if ! __check_parameters "Identifier and Item are mandatory parameters!" $identifier $item; then
         return 1
     fi
+
+    local file=$(__build_filename $identifier)
+    if collections_set_contains $identifier $item; then
+        echo "delete me"
+    fi
+
 }
 
 collections_set_contains() {
@@ -39,6 +49,13 @@ collections_set_contains() {
     if ! __check_parameters "Identifier and Item are mandatory parameters!" $identifier $item; then
         return 1
     fi
+    
+    local file=$(__build_filename $identifier)
+    return egrep -q "^$item$" $file
+}
+
+__build_filename() {
+    echo "${_COLLECTIONS_TEMPDIR}/{$1}.set"
 }
 
 __check_parameters() {
@@ -51,7 +68,6 @@ __check_parameters() {
         return 1
     fi
 }
-
  
 finish() {
     echo "cleaning up"
