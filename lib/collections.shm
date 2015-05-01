@@ -1,0 +1,61 @@
+#!/bin/bash
+
+_COLLECTIONS_TEMPDIR=$(mktemp)
+
+#collections_hash() {
+#    local identifier=$1
+#    local key=$2
+#    local value=$3
+#
+#    if [ "$identifier" == "" -o "$key" == "" ]; then
+#        echo "Identifier and Key are mandatory parameters!" >&2
+#        return 1
+#    fi
+#
+#}
+
+collections_set_put() {
+    local identifier=$1
+    local item=$2
+
+    if ! __check_parameters "Identifier and Item are mandatory parameters!" $identifier $item; then
+        return 1
+    fi
+}
+
+collections_set_delete() {
+    local identifier=$1
+    local item=$2
+
+    if ! __check_parameters "Identifier and Item are mandatory parameters!" $identifier $item; then
+        return 1
+    fi
+}
+
+collections_set_contains() {
+    local identifier=$1
+    local item=$2
+
+    if ! __check_parameters "Identifier and Item are mandatory parameters!" $identifier $item; then
+        return 1
+    fi
+}
+
+__check_parameters() {
+    local error_string=$1
+    local p1=$2
+    local p2=$3
+
+    if [ "$p1" == "" -o "$p2" == "" ]; then
+        echo "$error_string" 
+        return 1
+    fi
+}
+
+ 
+finish() {
+    echo "cleaning up"
+    rm -rvf $_COLLECTIONS_TEMPDIR
+}
+
+trap finish EXIT
