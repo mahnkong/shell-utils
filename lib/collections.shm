@@ -82,11 +82,38 @@ collections_map_keys() {
  
     local file=$(__build_filename $identifier map)
     if [ -f $file ]; then
+        egrep -o "^.+:::" $file | sed "s/:::$//" > /tmp/out
         egrep -o "^.+:::" $file | sed "s/:::$//"
         return 0
     fi
 
     return 1
+}
+
+collections_map_size() {
+    set +u
+    local identifier=$1
+
+    if ! __check_parameters "Usage: collections_map_size identifier" "$identifier"; then
+        return 1
+    fi
+    set -u
+ 
+    local file=$(__build_filename $identifier map)
+    return __get_number_of_lines_for_file $file
+}
+
+collections_set_size() {
+    set +u
+    local identifier=$1
+
+    if ! __check_parameters "Usage: collections_set_size identifier" "$identifier"; then
+        return 1
+    fi
+    set -u
+ 
+    local file=$(__build_filename $identifier map)
+    return __get_number_of_lines_for_file $file
 }
 
 collections_set_put() {
@@ -155,6 +182,17 @@ collections_set_items() {
     fi
 }
 
+__get_number_of_lines_for_file() {
+    local file=$1
+
+    if [ -f $file ]; then
+        wc -l $file
+    else
+        echo 0
+    fi
+    return 0
+}
+
 __build_filename() {
     echo "${_COLLECTIONS_TEMPDIR}/${1}.${2}"
 }
@@ -173,7 +211,7 @@ __check_parameters() {
 }
  
 finish() {
-    rm -rf $_COLLECTIONS_TEMPDIR 2> /dev/null
+    rm -rvf $_COLLECTIONS_TEMPDIR 2> /dev/null
 }
 
 trap finish EXIT
