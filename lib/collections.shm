@@ -98,7 +98,7 @@ collections_set_size() {
         return 1
     fi
  
-    local file=$(__build_filename $identifier map)
+    local file=$(__build_filename $identifier set)
     __get_number_of_lines_for_file $file
 }
 
@@ -188,8 +188,8 @@ __check_parameters() {
     fi
 }
  
-finish() {
+__collections_cleanup_tmpdir() {
     rm -rf $_COLLECTIONS_TEMPDIR 2> /dev/null
 }
 
-trap finish EXIT
+trap __collections_cleanup_tmpdir EXIT
