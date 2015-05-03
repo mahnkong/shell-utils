@@ -2,6 +2,167 @@
 
 _COLLECTIONS_TEMPDIR=$(mktemp -d)
 
+collections_list_push() {
+    local identifier=$1
+    local value=$2
+
+    if ! __check_parameters "Usage: collections_list_push identifier value" "$value"; then
+        return 1
+    fi
+    
+    local file=$(__build_filename $identifier list)
+    echo $value >> $file
+}
+
+collections_list_unshift() {
+    local identifier=$1
+    local value=$2
+
+    if ! __check_parameters "Usage: collections_list_unshift identifier value" "$value"; then
+        return 1
+    fi
+ 
+    local file=$(__build_filename $identifier list)
+    local tmpfile=$(mktemp -p $_COLLECTIONS_TEMPDIR)
+    echo $value > $tmpfile
+    if [ -f $file ]; then
+        cat $file >> $tmpfile
+    fi
+    mv $tmpfile $file
+}
+
+collections_list_shift() {
+    local identifier=$1
+
+    if ! __check_parameters "Usage: collections_list_shift identifier" "$identifier"; then
+        return 1
+    fi
+
+    local file=$(__build_filename $identifier list)
+    if [ -f $file ]; then
+        local tmpfile=$(mktemp -p $_COLLECTIONS_TEMPDIR)
+        head -n 1 $file
+        tail -n +2 $file > $tmpfile
+        mv $tmpfile $file
+        return 0
+    fi
+    return 1
+}
+
+collections_list_pop() {
+    local identifier=$1
+
+    if ! __check_parameters "Usage: collections_list_pop identifier" "$identifier"; then
+        return 1
+    fi
+
+    local file=$(__build_filename $identifier list)
+    if [ -f $file ]; then
+        local tmpfile=$(mktemp -p $_COLLECTIONS_TEMPDIR)
+        tail -n 1 $file
+        head -n -1 $file > $tmpfile
+        mv $tmpfile $file
+        return 0
+    fi
+    return 1
+}
+
+collections_list_get() {
+    local identifier=$1
+    local index=$2
+
+    if ! __check_parameters "Usage: collections_list_get identifier index" "$index"; then
+        return 1
+    fi
+
+    if ! __check_numeric "index must be a positive number!" "$index"; then
+        return 1
+    fi
+
+    local file=$(__build_filename $identifier list)
+    local line=$(( $index + 1 ))
+    if [ -f $file ]; then
+        tail -n +$line $file | head -1
+        return 0
+    fi
+    return 1
+}
+
+collections_list_delete() {
+    local identifier=$1
+    local index=$2
+
+    if ! __check_parameters "Usage: collections_list_delete identifier index" "$index"; then
+        return 1
+    fi
+
+    if ! __check_numeric "index must be a positive number!" "$index"; then
+        return 1
+    fi
+
+    if ! __modify_list_at_index "$identifier" $index; then
+        return 1
+    fi
+    return 0
+}
+
+collections_list_insert() {
+    local identifier=$1
+    local index=$2
+    local value=$3
+
+    if ! __check_parameters "Usage: collections_list_delete identifier" "$value"; then
+        return 1
+    fi
+
+    if ! __check_numeric "index must be a positive number!" "$index"; then
+        return 1
+    fi
+
+    if ! __modify_list_at_index "$identifier" $index "$value"; then
+        return 1
+    fi
+    return 0
+}
+
+collections_list_all() {
+    local identifier=$1
+
+    if ! __check_parameters "Usage: collections_list_delete identifier" "$identifier"; then
+        return 1
+    fi
+
+    local file=$(__build_filename $identifier list)
+    if [ -f $file ]; then
+        cat $file
+        return 0
+    fi
+    return 1
+}
+
+collections_list_size() {
+    local identifier=$1
+
+    if ! __check_parameters "Usage: collections_list_size identifier" "$identifier"; then
+        return 1
+    fi
+
+    local file=$(__build_filename $identifier list)
+    __get_number_of_lines_for_file $file
+}
+
+collections_list_clear() {
+    local identifier=$1
+
+    if ! __check_parameters "Usage: collections_list_clear identifier" "$identifier"; then
+        return 1
+    fi
+
+    local file=$(__build_filename $identifier list)
+    __clear_file $file
+}
+
+
 collections_map_put() {
     local identifier=$1
     local key=$2
@@ -39,7 +200,7 @@ collections_map_contains() {
     if ! __check_parameters "Usage: collections_map_contains identifier key" "$key"; then
         return 1
     fi
- 
+
     local file=$(__build_filename $identifier map)
     if egrep -q "^$key:::" $file > /dev/null 2>&1; then
         return 0
@@ -54,7 +215,7 @@ collections_map_get() {
     if ! __check_parameters "Usage: collections_map_get identifier key" "$key"; then
         return 1
     fi
- 
+
     if collections_map_contains "$identifier" "$key"; then
         local file=$(__build_filename $identifier map)
         egrep "^$key:::" $file | sed "s/^$key::://"
@@ -80,6 +241,28 @@ collections_map_keys() {
     return 1
 }
 
+collections_map_clear() {
+    local identifier=$1
+
+    if ! __check_parameters "Usage: collections_map_clear identifier" "$identifier"; then
+        return 1
+    fi
+
+    local file=$(__build_filename $identifier map)
+    __clear_file $file
+}
+
+collections_set_clear() {
+    local identifier=$1
+
+    if ! __check_parameters "Usage: collections_set_clear identifier" "$identifier"; then
+        return 1
+    fi
+
+    local file=$(__build_filename $identifier set)
+    __clear_file $file
+}
+
 collections_map_size() {
     local identifier=$1
 
@@ -97,7 +280,7 @@ collections_set_size() {
     if ! __check_parameters "Usage: collections_set_size identifier" "$identifier"; then
         return 1
     fi
- 
+
     local file=$(__build_filename $identifier set)
     __get_number_of_lines_for_file $file
 }
@@ -140,7 +323,7 @@ collections_set_contains() {
     if ! __check_parameters "Usage: collections_set_contains identifier item" "$item"; then
         return 1
     fi
-    
+
     local file=$(__build_filename $identifier set)
     if egrep -q "^$item$" $file > /dev/null 2>&1; then
         return 0
@@ -153,11 +336,39 @@ collections_set_items() {
     if ! __check_parameters "Usage: collections_set_items identifier" "$identifier"; then
         return 1
     fi
- 
+
     local file=$(__build_filename $identifier set)
     if [ -f $file ]; then
         cat $file;
     fi
+}
+
+__modify_list_at_index() {
+    local identifier=$1
+    local index=$2
+    local value=$3
+
+    local size=$(collections_list_size $identifier)
+    if [ $index -ge $size ]; then
+        caller=$(caller 1)
+        line=$(echo $caller | cut -d " " -f 1)
+        script=$(echo $caller | cut -d " " -f 3)
+        echo "Error in $script, line $line - index must be smaller then size of the list [$size]" >&2
+        return 1
+    fi
+
+    local file=$(__build_filename $identifier list)
+    if [ -f $file ]; then
+        local tmpfile=$(mktemp -p $_COLLECTIONS_TEMPDIR)
+        head -$index $file > $tmpfile
+        if [ "$value" != "" ]; then
+            echo $value >> $tmpfile
+        fi
+        tail -n +$(( $index + 2 )) $file >> $tmpfile
+        mv $tmpfile $file
+        return 0
+    fi
+    return 1
 }
 
 __get_number_of_lines_for_file() {
@@ -171,8 +382,32 @@ __get_number_of_lines_for_file() {
     return 0
 }
 
+__clear_file() {
+    local file=$1
+
+    if [ -f $file ]; then
+        > $file
+    fi
+    return 0
+}
+
 __build_filename() {
     echo "${_COLLECTIONS_TEMPDIR}/${1}.${2}"
+}
+
+__check_numeric() {
+    local error_string=$1
+    local n=$2
+
+    if [[ $n =~ ^[0-9]+$ ]]; then
+        return 0
+    fi
+
+    caller=$(caller 1)
+    line=$(echo $caller | cut -d " " -f 1)
+    script=$(echo $caller | cut -d " " -f 3)
+    echo "Error in $script, line $line - $error_string" >&2
+    return 1
 }
 
 __check_parameters() {
@@ -187,7 +422,7 @@ __check_parameters() {
         return 1
     fi
 }
- 
+
 __collections_cleanup_tmpdir() {
     rm -rf $_COLLECTIONS_TEMPDIR 2> /dev/null
 }
