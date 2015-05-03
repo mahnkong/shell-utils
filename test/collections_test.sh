@@ -38,6 +38,9 @@ assert_end parameter_collections_set_items
 assert_raises "collections_set_size" 1
 assert_end parameter_collections_set_size
 
+assert_raises "collections_set_clear" 1
+assert_end parameter_collections_set_clear
+
 assert_raises "collections_map_put" 1
 assert_raises "collections_map_put 1" 1
 assert_raises "collections_map_put 1 1" 1
@@ -60,6 +63,9 @@ assert_end parameter_collections_map_keys
 
 assert_raises "collections_map_size" 1
 assert_end parameter_collections_map_size
+
+assert_raises "collections_map_clear" 1
+assert_end parameter_collections_map_clear
 
 testcase=set_contains_fails_if_item_not_inside
 assert_raises "collections_set_contains $testcase 'My set item'" 1
@@ -89,6 +95,14 @@ assert "collections_set_size $testcase" "0"
 collections_set_put $testcase "My set item 1"
 collections_set_put $testcase "My set item 2"
 assert "collections_set_size $testcase" "2"
+assert_end $testcase
+
+testcase=set_clear_works
+collections_set_put $testcase "item1"
+collections_set_put $testcase "item2"
+assert "collections_set_size $testcase" "2"
+collections_set_clear $testcase
+assert "collections_set_size $testcase" "0"
 assert_end $testcase
 
 testcase=map_contains_fails_if_key_not_exist
@@ -132,7 +146,6 @@ collections_map_delete $testcase "key1"
 assert_raises "collections_map_contains $testcase 'key1'" 1
 assert_end $testcase
 
-
 testcase=map_size_returns_map_size
 assert "collections_map_size $testcase" "0"
 collections_map_put $testcase "key1" "value1"
@@ -140,4 +153,11 @@ collections_map_put $testcase "key2" "value2"
 assert "collections_map_size $testcase" "2"
 assert_end $testcase
 
+testcase=map_clear_works
+collections_map_put $testcase "key1" "value1"
+collections_map_put $testcase "key2" "value2"
+assert "collections_map_size $testcase" "2"
+collections_map_clear $testcase
+assert "collections_map_size $testcase" "0"
+assert_end $testcase
 

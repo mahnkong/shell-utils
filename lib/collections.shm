@@ -80,6 +80,28 @@ collections_map_keys() {
     return 1
 }
 
+collections_map_clear() {
+    local identifier=$1
+
+    if ! __check_parameters "Usage: collections_map_clear identifier" "$identifier"; then
+        return 1
+    fi
+
+    local file=$(__build_filename $identifier map)
+    __clear_file $file
+}
+
+collections_set_clear() {
+    local identifier=$1
+
+    if ! __check_parameters "Usage: collections_set_clear identifier" "$identifier"; then
+        return 1
+    fi
+
+    local file=$(__build_filename $identifier set)
+    __clear_file $file
+}
+
 collections_map_size() {
     local identifier=$1
 
@@ -167,6 +189,15 @@ __get_number_of_lines_for_file() {
         wc -l $file | cut -d " " -f 1
     else
         echo 0
+    fi
+    return 0
+}
+
+__clear_file() {
+    local file=$1
+
+    if [ -f $file ]; then
+        > $file
     fi
     return 0
 }
