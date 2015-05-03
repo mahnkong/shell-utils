@@ -67,6 +67,147 @@ assert_end parameter_collections_map_size
 assert_raises "collections_map_clear" 1
 assert_end parameter_collections_map_clear
 
+assert_raises "collections_list_push" 1
+assert_raises "collections_list_push 1" 1
+assert_end parameter_collections_list_push
+
+assert_raises "collections_list_unshift" 1
+assert_raises "collections_list_unshift 1" 1
+assert_end parameter_collections_list_unshift
+
+assert_raises "collections_list_shift" 1
+assert_end parameter_collections_list_shift
+
+assert_raises "collections_list_pop" 1
+assert_end parameter_collections_list_pop
+
+assert_raises "collections_list_get" 1
+assert_raises "collections_list_get 1" 1
+assert_raises "collections_list_get 1 test" 1
+assert_end parameter_collections_list_get
+
+assert_raises "collections_list_delete" 1
+assert_raises "collections_list_delete 1" 1
+assert_raises "collections_list_delete 1 test" 1
+assert_end parameter_collections_list_delete
+
+assert_raises "collections_list_all" 1
+assert_end parameter_collections_list_all
+
+assert_raises "collections_list_insert" 1
+assert_raises "collections_list_insert 1" 1
+assert_raises "collections_list_insert 1 1" 1
+assert_raises "collections_list_insert 1 test 1" 1
+assert_end parameter_collections_list_insert
+
+assert_raises "collections_list_size" 1
+assert_end parameter_collections_list_size
+
+assert_raises "collections_list_clear" 1
+assert_end parameter_collections_list_clear
+
+testcase=list_push_adds_element_at_end_of_list
+collections_list_push $testcase "entry 1"
+collections_list_push $testcase "entry 2"
+size=$(collections_list_size $testcase)
+last_index=$(( $size - 1))
+assert "collections_list_get $testcase $last_index" "entry 2\n"
+assert_end $testcase
+
+testcase=list_unshift_adds_element_at_beginning_of_list
+collections_list_push $testcase "entry 1"
+assert "collections_list_all $testcase" "entry 1\n"
+collections_list_unshift $testcase "entry 2"
+assert "collections_list_all $testcase" "entry 2\nentry 1\n"
+assert_end $testcase
+
+testcase=list_pop_gets_last_element_and_removes_it
+collections_list_push $testcase "entry 1"
+collections_list_push $testcase "entry 2"
+assert "collections_list_all $testcase" "entry 1\nentry 2\n"
+assert "collections_list_pop $testcase" "entry 2\n"
+assert "collections_list_all $testcase" "entry 1\n"
+assert_end $testcase
+
+testcase=list_shift_gets_first_element_and_removes_it
+collections_list_push $testcase "entry 1"
+collections_list_push $testcase "entry 2"
+assert "collections_list_all $testcase" "entry 1\nentry 2\n"
+assert "collections_list_shift $testcase" "entry 1\n"
+assert "collections_list_all $testcase" "entry 2\n"
+assert_end $testcase
+
+testcase=list_all_returns_complete_list
+assert "collections_list_all $testcase" ""
+collections_list_push $testcase "entry 1"
+collections_list_push $testcase "entry 2"
+assert "collections_list_all $testcase" "entry 1\nentry 2\n"
+assert_end $testcase
+
+testcase=list_delete_works
+collections_list_push $testcase "entry 1"
+collections_list_push $testcase "entry 2"
+collections_list_push $testcase "entry 3"
+assert "collections_list_all $testcase" "entry 1\nentry 2\nentry 3\n"
+collections_list_delete $testcase 1
+assert "collections_list_all $testcase" "entry 1\nentry 3\n"
+collections_list_delete $testcase 0
+assert "collections_list_all $testcase" "entry 3\n"
+assert_end $testcase
+
+testcase=list_delete_fails_if_index_to_big
+collections_list_push $testcase "entry 1"
+collections_list_push $testcase "entry 2"
+collections_list_push $testcase "entry 3"
+assert_raises "collections_list_delete $testcase 100" 1
+assert "collections_list_all $testcase" "entry 1\nentry 2\nentry 3\n"
+assert_end $testcase
+
+testcase=list_insert_works
+collections_list_push $testcase "entry 1"
+collections_list_push $testcase "entry 2"
+collections_list_push $testcase "entry 3"
+assert "collections_list_all $testcase" "entry 1\nentry 2\nentry 3\n"
+collections_list_insert $testcase 1 "entry 4"
+assert "collections_list_all $testcase" "entry 1\nentry 4\nentry 3\n"
+collections_list_insert $testcase 0 "entry 5"
+assert "collections_list_all $testcase" "entry 5\nentry 4\nentry 3\n"
+assert_end $testcase
+
+testcase=list_insert_fails_if_index_to_big
+collections_list_push $testcase "entry 1"
+collections_list_push $testcase "entry 2"
+collections_list_push $testcase "entry 3"
+assert_raises "collections_list_insert $testcase 100 'entry 4'" 1
+assert "collections_list_all $testcase" "entry 1\nentry 2\nentry 3\n"
+assert_end $testcase
+
+testcase=list_get_works
+collections_list_push $testcase "entry 1"
+collections_list_push $testcase "entry 2"
+collections_list_push $testcase "entry 3"
+assert "collections_list_get $testcase 0" "entry 1\n"
+assert "collections_list_get $testcase 1" "entry 2\n"
+assert "collections_list_get $testcase 2" "entry 3\n"
+assert "collections_list_get $testcase 100" ""
+assert_end $testcase
+
+
+testcase=list_size_returns_list_size
+assert "collections_list_size $testcase" "0"
+collections_list_push $testcase "entry"
+collections_list_push $testcase "entry"
+assert "collections_list_size $testcase" "2"
+assert_end $testcase
+
+testcase=list_clear_works
+collections_list_push $testcase "entry"
+collections_list_push $testcase "entry"
+assert "collections_list_size $testcase" "2"
+collections_list_clear $testcase
+assert "collections_list_size $testcase" "0"
+assert_end $testcase
+
 testcase=set_contains_fails_if_item_not_inside
 assert_raises "collections_set_contains $testcase 'My set item'" 1
 assert_end $testcase
