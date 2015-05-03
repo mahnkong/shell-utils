@@ -233,7 +233,6 @@ collections_map_keys() {
  
     local file=$(__build_filename $identifier map)
     if [ -f $file ]; then
-        egrep -o "^.+:::" $file | sed "s/:::$//" > /tmp/out
         egrep -o "^.+:::" $file | sed "s/:::$//"
         return 0
     fi
