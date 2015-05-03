@@ -111,7 +111,7 @@ collections_list_insert() {
     local index=$2
     local value=$3
 
-    if ! __check_parameters "Usage: collections_list_delete identifier" "$value"; then
+    if ! __check_parameters "Usage: collections_list_insert identifier" "$value"; then
         return 1
     fi
 
@@ -128,7 +128,7 @@ collections_list_insert() {
 collections_list_all() {
     local identifier=$1
 
-    if ! __check_parameters "Usage: collections_list_delete identifier" "$identifier"; then
+    if ! __check_parameters "Usage: collections_list_all identifier" "$identifier"; then
         return 1
     fi
 
