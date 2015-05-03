@@ -352,7 +352,7 @@ __modify_list_at_index() {
         caller=$(caller 1)
         line=$(echo $caller | cut -d " " -f 1)
         script=$(echo $caller | cut -d " " -f 3)
-        echo "Error in $script, line $line - index must be smaller then size of the list [$size]" >&2
+        echo "Error in $script, line $line - index must be smaller than size of the list [$size]" >&2
         return 1
     fi
 
