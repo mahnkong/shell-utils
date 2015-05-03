@@ -51,6 +51,11 @@ Therefore I created a shell module providing a Set and Map implementation based 
   * collections_map_size (identifier):
   
     echoes the number of *key* / *value* pairs of the map identified by *identifier*
+
+  * collections_map_clear (identifier):
+
+    clears the map identified by *identifier*
+
 * Set Example usage:
   ```bash
   #load the module
@@ -90,3 +95,7 @@ Therefore I created a shell module providing a Set and Map implementation based 
   * collections_set_size (identifier)
   
     echoes the number of items inside the set identified by *identifier*
+
+  * collections_set_clear (identifier):
+
+    clears the set identified by *identifier*
