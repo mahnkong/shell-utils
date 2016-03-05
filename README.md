@@ -1,3 +1,5 @@
+![Travis build status](https://api.travis-ci.org/mahnkong/shell-utils.svg?branch=develop)
+
 # shell-utils
 Utilities and helper methods for shell programming (bash)
 
